@@ -1,0 +1,112 @@
+{
+  "name": "My workflow",
+  "nodes": [
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [
+        -60,
+        0
+      ],
+      "id": "f2dc2015-92cd-48d5-8c0f-dc077dd57b8d",
+      "name": "When clicking ‘Execute workflow’"
+    },
+    {
+      "parameters": {
+        "command": "pipx run youtube_transcript_api NClmyC6olC0"
+      },
+      "type": "n8n-nodes-base.executeCommand",
+      "typeVersion": 1,
+      "position": [
+        180,
+        0
+      ],
+      "id": "d3e34545-6b9b-4bd8-ac40-53978bff21ec",
+      "name": "Execute Command"
+    },
+    {
+      "parameters": {
+        "language": "python",
+        "pythonCode": "import ast\n\nfor item in _input.all():\n    stdout_raw = item.json.get(\"stdout\", \"\")\n\n    try:\n        # Converte string para lista real de listas de dicionários\n        subtitles_data = ast.literal_eval(stdout_raw)\n\n        # Junta todos os textos\n        all_texts = []\n        for group in subtitles_data:\n            for segment in group:\n                text = segment.get(\"text\", \"\")\n                all_texts.append(text)\n\n        # Cria a transcrição final\n        transcript = \" \".join(all_texts).replace(\"\\n\", \" \").strip()\n\n        # Adiciona ao JSON\n        item.json[\"transcript\"] = transcript\n\n    except Exception as e:\n        item.json[\"transcript\"] = \"\"\n        item.json[\"error\"] = f\"Erro ao processar transcrição: {str(e)}\"\n\nreturn _input.all()\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        420,
+        0
+      ],
+      "id": "ad079b7f-4f52-4ee8-a435-93cd1cbf4351",
+      "name": "Code"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "5031a41e-a45e-4e36-9af6-2d4039655af8",
+              "name": "transcript",
+              "value": "={{ $json.transcript }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        640,
+        0
+      ],
+      "id": "9788285d-3f2f-4d9d-8c6d-db9d5b3b3df3",
+      "name": "Edit Fields"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "When clicking ‘Execute workflow’": {
+      "main": [
+        [
+          {
+            "node": "Execute Command",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Execute Command": {
+      "main": [
+        [
+          {
+            "node": "Code",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code": {
+      "main": [
+        [
+          {
+            "node": "Edit Fields",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "7f0d69aa-f0b8-41c0-b5c1-50a06e30fcd5",
+  "meta": {
+    "instanceId": "ad2dd66d86f9c8678f5d507bf782e60002e6159e04bf411218792655efde4b90"
+  },
+  "id": "Zfkf8INzUIQBEPR0",
+  "tags": []
+}
