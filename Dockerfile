@@ -1,4 +1,4 @@
-FROM n8nio/n8n:1.108.1
+FROM n8nio/n8n:next
 
 # Instala python3 e pip como root
 USER root
